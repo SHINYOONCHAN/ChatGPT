@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #111111;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+        }
+
+        input[type="submit"] {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #111111;
+            margin-bottom: 10px;
+        }
+
+        .recipe {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+    <title>GPT에게 냉장고를 부탁해</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">GPT에게 냉장고를 부탁해</h1>
+        <form method="post" action="/" class="mb-4">
+            <div class="form-group">
+                <label for="question">식재료 입력</label>
+                <input type="text" id="question" name="question" class="form-control" required placeholder="밥, 대파, 계란, 소금, 양파 등을 입력해주세요">
+            </div>
+            <button type="submit" class="btn btn-dark">요청</button>
+        </form>
+        {% if question %}
+            <p class="lead">식재료: {{ question }}</p>
+        {% endif %}
+        {% if assistant_content %}
+            <h2>결과</h2>
+            <div class="recipe">
+                {% for step in assistant_content.split('\n') %}
+                    {% if step %}
+                        <p>{{ step }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
