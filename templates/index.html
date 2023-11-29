@@ -1,84 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT에게 냉장고를 부탁해</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
-            color: #333;
+            background-color: #f8f9fa;
+            color: #343a40;
             margin: 20px;
         }
 
         h1 {
-            color: #111111;
+            color: #343a40;
         }
 
-        form {
+        div {
             margin-bottom: 20px;
         }
 
         label {
             font-weight: bold;
+            margin-right: 10px;
         }
 
         input[type="text"] {
-            padding: 5px;
+            padding: 8px;
         }
 
-        input[type="submit"] {
-            padding: 5px 10px;
+        button {
+            margin-top: 20px;
+            padding: 8px 16px;
             cursor: pointer;
-        }
-
-        p {
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            color: #111111;
-            margin-bottom: 10px;
         }
 
         .recipe {
             background-color: #fff;
-            padding: 10px;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        }
+
+        .ingredient-label {
+            font-weight: bold;
+            margin-right: 5px;
         }
     </style>
-    <title>GPT에게 냉장고를 부탁해</title>
 </head>
+
 <body>
     <div class="container">
         <h1 class="mt-4">GPT에게 냉장고를 부탁해</h1>
-        <form method="post" action="/" class="mb-4">
-            <div class="form-group">
-                <label for="question">식재료 입력</label>
-                <input type="text" id="question" name="question" class="form-control" required placeholder="밥, 대파, 계란, 소금, 양파 등을 입력해주세요">
-            </div>
-            <button type="submit" class="btn btn-dark">요청</button>
-        </form>
-        {% if question %}
-            <p class="lead">식재료: {{ question }}</p>
-        {% endif %}
-        {% if assistant_content %}
-            <h2>결과</h2>
-            <div class="recipe">
-                {% for step in assistant_content.split('\n') %}
-                    {% if step %}
-                        <p>{{ step }}</p>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endif %}
+
+        <div class="form-group">
+            <label for="question">식재료 입력</label>
+            <input type="text" id="question" name="question" class="form-control" required
+                placeholder="밥 대파 계란 소금 양파 등을 입력해주세요">
+            <button class="btn btn-dark" onclick="askQuestion()">요청</button>
+
+        </div>
+        <div id="ingredient-display"></div>
+        <div id="result-display"></div>
+        <div class="recipe">
+            <div id="response-container" class="response"></div>
+        </div>
+
     </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('assistant_response', function (msg) {
+            var responseContainer = document.getElementById('response-container');
+            var responseText = decodeURIComponent(msg.response);
+
+            responseText = responseText.replace(/\n/g, '<br>');
+            responseText = convertMarkdownToHTML(responseText);
+
+            var resultDisplay = document.getElementById('result-display');
+            resultDisplay.innerHTML = '<h3>결과</h3>';
+            
+            responseContainer.innerHTML += '<span>' + responseText + '</span>';
+            var recipeDiv = document.querySelector('.recipe');
+            recipeDiv.style.padding = '20px';
+        });
+
+        function convertMarkdownToHTML(text) {
+            text = text.replace(/^(#+)\s*(.*)/gm, function (match, hashes, content) {
+                var level = hashes.length;
+                return '<h' + level + '>' + content.trim() + '</h' + level + '>';
+            });
+
+            return text;
+        }
+
+        function askQuestion() {
+            var questionInput = document.getElementById('question');
+            var question = questionInput.value;
+            var ingredientDisplay = document.getElementById('ingredient-display');
+            ingredientDisplay.innerHTML = '<span class="ingredient-label">식재료: </span>' + question;
+            socket.emit('ask_question', { 'question': question });
+            questionInput.value = '';
+        }
+
+    </script>
 </body>
+
 </html>
